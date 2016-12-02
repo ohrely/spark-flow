@@ -36,6 +36,7 @@ class HashingTest extends FunSuite with SharedSparkContext with ShouldMatchers{
     val nested = (x: Int) => x * 4 + param + another(x)
     val g = (x: Int) => nested(x) + param
 
+    val initialAnother = hashClass(another)
     val initialOutput = g(input)
     val initialGHash = hashClass(g)
     assert(initialGHash != hashClass(nested))
@@ -45,7 +46,25 @@ class HashingTest extends FunSuite with SharedSparkContext with ShouldMatchers{
     param = 10
     assert(initialGHash != hashClass(g))
     assert(initialOutput != g(input))
+    assert(initialAnother == hashClass(another))
+  }
 
+  test("functionHashing2"){
+    val input = 5
+
+    val g = (x: Int) => HashingSample2.another(x)
+
+    val initialOutput = g(input)
+    val initialGHash = hashClass(g)
+    val initialHSHash = hashClass(HashingSample2)
+
+    assert(initialGHash == hashClass(g))
+
+    HashingSample2.changeParam
+
+    assert(initialHSHash != hashClass(HashingSample2))
+    assert(initialGHash != hashClass(g))
+    assert(initialOutput != g(input))
   }
 
   test("dcHashing"){

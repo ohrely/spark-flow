@@ -10,7 +10,7 @@ object HashingSample {
     .map{case (key, values) => Func.playWithValues(values)}
 }
 
-object Input { // changes affect result
+object Input {
   val input = parallelize(Seq((1, 1), (1, 2), (2, 3), (2, 4)))
 }
 
@@ -22,5 +22,16 @@ object Func {
   val playWithValues = (values: Seq[Int]) => {
     val newValues = values.map(v => Str.str)
     newValues
+  }
+}
+
+object HashingSample2 {
+  var param: Int = 4
+
+  //  def another(x: Int): Int = x * param
+  val another: Int => Int = x => x * param
+
+  def changeParam = {
+    param = 3
   }
 }

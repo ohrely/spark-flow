@@ -51,6 +51,7 @@ object ClassExploration extends Logging {
       encounteredSerializedFields ++= fieldObjects.map(f => s"${obj.getClass.getName}||${f.toString}")
       val (methodObjects, methods) = getObjectsAndMethods(obj)
       methodsEncountered ++= methods
+      encounteredSerializedFields ++= methodObjects.map(m => s"${obj.getClass.getName}||${m.toString}")
 
       val newFieldObjects = (fieldObjects ++ methodObjects).filter(fieldObject => {
         val clz = fieldObject.getClass
@@ -84,6 +85,7 @@ object ClassExploration extends Logging {
         f.setAccessible(true)
         f.get(func)
       }).filter(_ != null)
+      .filter(obj => Try{obj.hashCode()}.isSuccess)
 
     nestedObjects.toSet
   }
@@ -98,7 +100,13 @@ object ClassExploration extends Logging {
   }
 
   def shouldExplore(name: String): Boolean = {
-    !(name.startsWith("java") || name.startsWith("scala") || name.contains("[") || name.contains(";") || EXCLUDED_NAMES.contains(name))
+    !(
+      name.startsWith("java")
+      || name.startsWith("scala")
+      || name.contains("[")
+      || name.contains(";")
+      || EXCLUDED_NAMES.contains(name)
+    )
   }
 
   def hasFields(obj: AnyRef) = {
@@ -223,7 +231,7 @@ object ClassExploration extends Logging {
         logDebug(s"visitField name: $name, desc: $desc, sig: $sig")
       }
 
-      new FieldExplorer(ownerNames)
+      new FieldExplorer(fieldOwnerNames)
     }
   }
 
@@ -245,7 +253,7 @@ object ClassExploration extends Logging {
     }
   }
 
-  class FieldExplorer(ownerNames: scala.collection.mutable.Set[OwnerName]) extends FieldVisitor(ASM5) {
+  class FieldExplorer(fieldOwnerNames: scala.collection.mutable.Set[FieldOwnerName]) extends FieldVisitor(ASM5) {
 
     if (fv != null) {
       logDebug(s"FieldExplorer: ${fv.toString}")

@@ -48,7 +48,6 @@ private[sparkflow] object Hashing extends Logging {
     hashClass(f)
   }
 
-  //TODO: fix hashing on case statement functions
   def hashClass(obj: AnyRef) = {
     val (allDepedendentClasses, serializedFields) = getClassesAndSerializedFields(obj)
 
