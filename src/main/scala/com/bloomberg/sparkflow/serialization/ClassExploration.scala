@@ -48,10 +48,16 @@ object ClassExploration extends Logging {
       exploredClasses = exploredClasses + obj.getClass
 
       val fieldObjects = getFieldObjects(obj)
+      logDebug(s"fieldObjects: ${fieldObjects}")
       encounteredSerializedFields ++= fieldObjects.map(f => s"${obj.getClass.getName}||${f.toString}")
+      logDebug(s"encounteredSerializedFields: ${encounteredSerializedFields}")
+
       val (methodObjects, methods) = getObjectsAndMethods(obj)
       methodsEncountered ++= methods
       encounteredSerializedFields ++= methodObjects.map(m => s"${obj.getClass.getName}||${m.toString}")
+
+      logDebug(s"methodsEncountered: ${methodsEncountered}")
+      logDebug(s"methodObjects: $methodObjects")
 
       val newFieldObjects = (fieldObjects ++ methodObjects).filter(fieldObject => {
         val clz = fieldObject.getClass
@@ -194,7 +200,7 @@ object ClassExploration extends Logging {
                              desc: String,
                              sig: String,
                              exceptions: Array[String]): MethodVisitor = {
-      logDebug(s"ClassMethodFinder visitMethod: name: $name, desc: $desc")
+//      logDebug(s"ClassMethodFinder visitMethod: name: $name, desc: $desc")
       if (name.startsWith("apply")) {
         new MethodFinder(ownerNames)
       } else {
@@ -212,7 +218,7 @@ object ClassExploration extends Logging {
                               desc: String,
                               sig: String,
                               exceptions: Array[String]): MethodVisitor = {
-      logDebug(s"ClassMethodExplorer visitMethod: name: $name, desc: $desc")
+//      logDebug(s"ClassMethodExplorer visitMethod: name: $name, desc: $desc")
       if (methodName == name) {
         new MethodExplorer(ownerNames, fieldOwnerNames)
       } else {
@@ -228,7 +234,7 @@ object ClassExploration extends Logging {
       if (sig != null && value != null) {
         logDebug(s"visitField name: $name, desc: $desc, sig: $sig, value: ${value.getClass}: ${value.toString}")
       } else {
-        logDebug(s"visitField name: $name, desc: $desc, sig: $sig")
+//        logDebug(s"visitField name: $name, desc: $desc, sig: $sig, value: ${value.getClass}: ${value.toString}")
       }
 
       new FieldExplorer(fieldOwnerNames)
@@ -238,6 +244,7 @@ object ClassExploration extends Logging {
   class MethodFinder(ownerNames: scala.collection.mutable.Set[OwnerName]) extends MethodVisitor(ASM5) {
 
     override def visitMethodInsn(opcode: Int, owner: String, name: String, desc: String, itf: Boolean) {
+      logDebug(s"visitMethodInsn owner: $owner")
       ownerNames.add(OwnerName(cleanClassName(owner), name))
     }
   }
@@ -258,7 +265,7 @@ object ClassExploration extends Logging {
     if (fv != null) {
       logDebug(s"FieldExplorer: ${fv.toString}")
     } else {
-      logDebug("FieldExplorer is null")
+//      logDebug("FieldExplorer is null")
     }
 
   }
